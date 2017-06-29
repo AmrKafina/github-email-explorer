@@ -53,26 +53,26 @@ def select_action_count(github_repo, action_type):
         return github_repo.watchers_count
 
 
-def integrate_user_ids(user_id, repo, actions, github_api_auth):
+def integrate_user_ids(user_id, repo, actions, start_page, total_pages, github_api_auth):
     user_ids = []
     for action_type in actions:
         # get repo
         github_repo = repository(user_id, repo, github_api_auth)
         # pagination
         per_page = 100
-        total_pages = select_action_count(github_repo, action_type) / per_page
+        # total_pages = select_action_count(github_repo, action_type) / per_page
         # create url
         url = EndPoint.add_auth_info(select_end_porint_builder(action_type)(user_id, repo), github_api_auth)
         # get id by rolling pages
-        user_ids = user_ids + request_user_ids_by_roll_pages(url, total_pages, per_page)
+        user_ids = user_ids + request_user_ids_by_roll_pages(url, start_page, total_pages, per_page)
 
     return OrderedDict.fromkeys(user_ids).keys()
 
 
-def request_user_ids_by_roll_pages(url, total_pages, per_page):
+def request_user_ids_by_roll_pages(url, start_page, total_pages, per_page):
     # loop page with url
     user_ids = []
-    for i in range(0, total_pages + 1):
+    for i in range(start_page, total_pages + 1):
         url = EndPoint.pagination(url, page=(i + 1), per_page=per_page)
         r = requests.get(url)
 
@@ -85,9 +85,9 @@ def request_user_ids_by_roll_pages(url, total_pages, per_page):
     return user_ids
 
 
-def collect_email_info(repo_user_id, repo_name, actions, github_api_auth=None):
+def collect_email_info(repo_user_id, repo_name, actions, start_page, total_pages, github_api_auth=None):
     # get user ids
-    user_ids = integrate_user_ids(repo_user_id, repo_name, actions, github_api_auth)
+    user_ids = integrate_user_ids(repo_user_id, repo_name, actions, start_page, total_pages, github_api_auth)
     # get and return email info
     return users_email_info(user_ids, github_api_auth)
 
