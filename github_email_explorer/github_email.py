@@ -59,7 +59,7 @@ def integrate_user_ids(user_id, repo, actions, start_page, total_pages, github_a
         # get repo
         github_repo = repository(user_id, repo, github_api_auth)
         # pagination
-        per_page = 100
+        per_page = 10
         # total_pages = select_action_count(github_repo, action_type) / per_page
         # create url
         url = EndPoint.add_auth_info(select_end_porint_builder(action_type)(user_id, repo), github_api_auth)
@@ -73,6 +73,8 @@ def request_user_ids_by_roll_pages(url, start_page, total_pages, per_page):
     # loop page with url
     user_ids = []
     for i in range(start_page, total_pages + 1):
+        print "Running with page %d" % (i)
+
         url = EndPoint.pagination(url, page=(i + 1), per_page=per_page)
         r = requests.get(url)
 
